@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import db from '../lib/db';
 
 interface TestCase {
   id: string;
@@ -27,24 +28,33 @@ interface StoryState {
 }
 
 export const useStoryStore = create<StoryState>((set) => ({
-  stories: [],
+  stories: db.query('SELECT * FROM stories'),
   currentStory: null,
-  addStory: (story) =>
+  addStory: (story) => {
+    const newStory = {
+      ...story,
+      id: Math.random().toString(36).slice(2),
+      createdAt: new Date().toISOString(),
+    };
+    db.insert('stories', newStory);
     set((state) => ({
-      stories: [
-        ...state.stories,
-        {
-          ...story,
-          id: Math.random().toString(36).slice(2),
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    })),
-  setCurrentStory: (story) => set({ currentStory: story }),
-  updateStory: (id, updates) =>
+      stories: [...state.stories, newStory],
+    }));
+  },
+  setCurrentStory: (story) => {
+    if (story) {
+      const fetchedStory = db.query('SELECT * FROM stories WHERE id = ?', [story.id]);
+      set({ currentStory: fetchedStory[0] });
+    } else {
+      set({ currentStory: null });
+    }
+  },
+  updateStory: (id, updates) => {
+    db.update('stories', updates, { id });
     set((state) => ({
       stories: state.stories.map((story) =>
         story.id === id ? { ...story, ...updates } : story
       ),
-    })),
+    }));
+  },
 }));

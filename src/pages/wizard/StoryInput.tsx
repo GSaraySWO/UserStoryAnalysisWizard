@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/auth-store';
 import { Upload } from 'lucide-react';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import db from '../../lib/db';
 
 export default function StoryInput() {
   const navigate = useNavigate();
@@ -31,15 +32,18 @@ export default function StoryInput() {
         content,
         document: file?.name || currentStory.document,
       });
+      db.update('stories', { title, content, document: file?.name || currentStory.document }, { id: currentStory.id });
     } else {
-      addStory({
+      const newStory = {
         title,
         content,
         userId: user.id,
         userName: user.name,
         document: file?.name,
         testCases: [],
-      });
+      };
+      addStory(newStory);
+      db.insert('stories', newStory);
     }
 
     navigate('/wizard/test-cases');
