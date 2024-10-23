@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStoryStore } from '../../store/story-store';
 import Button from '../../components/Button';
+import db from '../../lib/db';
 
 const initialTestCases = `Test Case 1: Verify user can submit form with valid inputs
 - Steps:
@@ -48,6 +49,8 @@ export default function TestCases() {
       updateStory(currentStory.id, {
         testCases: parsedTestCases,
       });
+
+      db.update('stories', { testCases: parsedTestCases }, { id: currentStory.id });
     }
     navigate('/wizard/selection');
   };

@@ -3,10 +3,11 @@ import { useStoryStore } from '../store/story-store';
 import { useAuthStore } from '../store/auth-store';
 import { PlusCircle, LogOut, Edit } from 'lucide-react';
 import Button from '../components/Button';
+import db from '../lib/db';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const stories = useStoryStore((state) => state.stories);
+  const stories = db.query('SELECT * FROM stories');
   const setCurrentStory = useStoryStore((state) => state.setCurrentStory);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
